@@ -156,19 +156,6 @@ Authorization: Bearer tok_admin_demo_session
 
 ---
 
-## 💼 Resume Bullet Points (Copy & Paste for Software Engineering Roles)
-
-- **Backend & API Design**:
-  > *"Architected and built a high-throughput RESTful API Gateway in Node.js/Express, managing microservice routing, cryptographic SHA-256 API key generation, and RBAC permission scopes (`read`/`write`/`admin`)."*
-
-- **Performance & Security**:
-  > *"Engineered an in-memory sliding-window rate limiter enforcing SLA quotas, mitigating brute-force and DDoS vectors with RFC-compliant `X-RateLimit` headers and HTTP 429 retry-after responses."*
-
-- **Developer Experience & Observability**:
-  > *"Developed an interactive REST API testing playground and real-time observability telemetry dashboard tracking p95 latency percentiles, HTTP status distributions, and chronological audit trails."*
-
----
-
 ## 📂 Project Structure
 
 ```text
