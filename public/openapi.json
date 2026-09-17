@@ -1,0 +1,186 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Cloud API Gateway & Microservices Platform",
+    "version": "1.0.0",
+    "description": "High-performance Express.js REST API with RBAC authorization, cryptographic SHA-256 API key management, sliding-window rate limiting, and real-time observability telemetry.",
+    "contact": {
+      "name": "API Engineering Team",
+      "email": "api@company.io"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api",
+      "description": "Current Environment API Gateway"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "SHA-256 hashed cryptographically generated API key (e.g., sk_live_...)"
+      },
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "User session authorization token"
+      }
+    },
+    "schemas": {
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "slug": { "type": "string" },
+          "description": { "type": "string" },
+          "environment": { "type": "string", "enum": ["production", "staging", "development"] },
+          "status": { "type": "string", "enum": ["active", "maintenance", "deprecated"] },
+          "rateLimitTier": { "type": "string", "enum": ["basic", "standard", "enterprise"] },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "slug", "environment", "status"]
+      },
+      "ApiKey": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "keyPrefix": { "type": "string" },
+          "environment": { "type": "string", "enum": ["production", "staging", "development"] },
+          "scopes": { "type": "array", "items": { "type": "string", "enum": ["read", "write", "admin"] } },
+          "rateLimit": { "type": "integer" },
+          "status": { "type": "string", "enum": ["active", "revoked"] },
+          "usageCount": { "type": "integer" },
+          "lastUsedAt": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" },
+          "message": { "type": "string" },
+          "statusCode": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health probe endpoint",
+        "description": "Lightweight container status ping for reverse proxies and orchestrators.",
+        "responses": {
+          "200": {
+            "description": "Gateway online",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "ok" },
+                    "service": { "type": "string", "example": "RESTful API Server" },
+                    "timestamp": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projects": {
+      "get": {
+        "summary": "List all registered microservices",
+        "parameters": [
+          { "name": "environment", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of microservices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "count": { "type": "integer" },
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/Project" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Register a new microservice",
+        "security": [{ "ApiKeyAuth": [] }, { "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["name", "slug"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "slug": { "type": "string" },
+                  "description": { "type": "string" },
+                  "environment": { "type": "string", "enum": ["production", "staging", "development"] },
+                  "rateLimitTier": { "type": "string", "enum": ["basic", "standard", "enterprise"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Microservice created successfully" },
+          "401": { "$ref": "#/components/schemas/ErrorResponse" },
+          "403": { "$ref": "#/components/schemas/ErrorResponse" },
+          "429": { "$ref": "#/components/schemas/ErrorResponse" }
+        }
+      }
+    },
+    "/keys": {
+      "get": {
+        "summary": "List API keys",
+        "security": [{ "BearerAuth": [] }, { "ApiKeyAuth": [] }],
+        "responses": {
+          "200": { "description": "List of active API keys" }
+        }
+      },
+      "post": {
+        "summary": "Provision new API key",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "201": { "description": "Key created with one-time plain-text token secret" }
+        }
+      }
+    },
+    "/analytics/overview": {
+      "get": {
+        "summary": "Retrieve gateway performance analytics and telemetry",
+        "responses": {
+          "200": { "description": "Traffic volume, p95 latencies, HTTP status codes, and memory usage" }
+        }
+      }
+    },
+    "/test/echo": {
+      "post": {
+        "summary": "Payload and headers echo validation endpoint",
+        "responses": {
+          "200": { "description": "Reflects incoming request payload, headers, and authentication context" }
+        }
+      }
+    }
+  }
+}

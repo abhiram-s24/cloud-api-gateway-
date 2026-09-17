@@ -1,0 +1,107 @@
+{
+  "info": {
+    "name": "Cloud API Gateway & Microservices Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Ready-to-import Postman Collection for Cloud API Gateway"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "health"]
+        }
+      }
+    },
+    {
+      "name": "List Microservices",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "x-api-key", "value": "{{apiKey}}", "type": "text" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/projects?environment=production",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "projects"],
+          "query": [
+            { "key": "environment", "value": "production" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Register Microservice",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Payments Dispatcher\",\n  \"slug\": \"payments-v2\",\n  \"description\": \"Stripe and PayPal webhook processor\",\n  \"environment\": \"production\",\n  \"rateLimitTier\": \"enterprise\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/projects",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "projects"]
+        }
+      }
+    },
+    {
+      "name": "List API Keys",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{sessionToken}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/keys",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "keys"]
+        }
+      }
+    },
+    {
+      "name": "Gateway Telemetry",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/analytics/overview",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "analytics", "overview"]
+        }
+      }
+    },
+    {
+      "name": "Echo Test (Protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "x-api-key", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"ping\",\n  \"timestamp\": \"2026-09-17T00:00:00Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/test/echo",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "test", "echo"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "apiKey", "value": "sk_live_master_admin_9921x" },
+    { "key": "sessionToken", "value": "tok_admin_demo_session" }
+  ]
+}
